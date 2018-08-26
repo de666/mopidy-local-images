@@ -8,6 +8,7 @@ import os
 import os.path
 import re
 import struct
+import platform
 
 from mopidy import local
 from mopidy.audio import scan
@@ -19,6 +20,8 @@ import uritools
 from . import Extension
 
 logger = logging.getLogger(__name__)
+
+_is_linux = (platform.system() == 'Linux')
 
 
 # would be nice to have these in imghdr...
@@ -210,9 +213,13 @@ class ImageLibrary(local.Library):
             name = '%s.%s' % (digest, what)
         dest = os.path.join(self.image_dir, name)
         if not os.path.isfile(dest):
-            logger.info('Creating file %s', dest)
-            with open(dest, 'wb') as fh:
-                fh.write(data)
+            if _is_linux and path:
+                logger.info('Creating symlink %s', dest)
+                os.symlink(path, dest)
+            else:
+                logger.info('Creating file %s', dest)
+                with open(dest, 'wb') as fh:
+                    fh.write(data)
         return uritools.urijoin(self.base_uri, name)
 
     def _scan(self, uri):
