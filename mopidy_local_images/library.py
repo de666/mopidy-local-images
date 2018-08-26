@@ -179,7 +179,7 @@ class ImageLibrary(local.Library):
                 logger.warn('Error extracting images for %r: %r', uri, e)
         # look for external album art
         path = translator.local_uri_to_path(uri, self.media_dir)
-        dirname = os.path.dirname(path)
+        dirname = os.path.dirname(path).decode('utf-8').replace('[', '[[]')
         for pattern in self.patterns:
             for path in glob.glob(os.path.join(dirname, pattern)):
                 try:
